@@ -53,8 +53,8 @@ func main() {
 
 	// генерируем числа, считая параллельно их количество и сумму
 	go Generator(ctx, chIn, func(i int64) {
-		inputSum += i
-		inputCount++
+		atomic.AddInt64(&inputSum, i)
+		atomic.AddInt64(&inputCount, 1)
 	})
 
 	const NumOut = 5 // количество обрабатывающих горутин и каналов
@@ -79,7 +79,7 @@ func main() {
 		go func(in <-chan int64, index int) {
 			defer wg.Done()
 			for v := range in {
-				atomic.AddInt64(&amounts[index], 1)
+				amounts[index]++
 				chOut <- v
 			}
 		}(outs[i], i)
